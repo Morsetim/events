@@ -19,7 +19,7 @@ export class AppService {
 
   
 
-  constructor(private readonly abiService: ABiService,) {
+  constructor(private readonly abiService: ABiService) {
     this.web3 = new Web3('https://eth-mainnet.g.alchemy.com/v2/PHfwSF8C1wTEfBKsqP4tJkhAaKV99zQf');
     this.initializeContract();
     this.getBlockNumber()
@@ -41,13 +41,18 @@ export class AppService {
   }
 
   async getTransferEvents(fromBlock: number = 0, toBlock: string = 'latest') {
-    const a = await this.contract.getPastEvents('Transfer', {
-      fromBlock: this.fromNumber,
-      toBlock,
-    });
+    try {
+      const events = await this.contract.getPastEvents('Transfer', {
+        filter: { from: this.contractAddress },
+        fromBlock: fromBlock,
+        toBlock: toBlock,
+      });
+      console.log('Events:', events);
+      return events;
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    }
   }
-
-  
 
   async getMintEvents(fromBlock: number = 0, toBlock: number = 0) {
     return await this.contract.getPastEvents('Mint', {
@@ -66,4 +71,3 @@ export class AppService {
     return receipt.transactionHash;
   }
 }
-
